@@ -3,7 +3,6 @@ import './App.css';
 
 // Use relative paths - Vercel serverless function will proxy to your API
 const API_URL = '/api/proxy';
-const WS_URL = 'ws://45.94.81.202:3001'; // Direct WebSocket (may not work on HTTPS)
 
 function App() {
   const [tokens, setTokens] = useState([]);
@@ -11,8 +10,6 @@ function App() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [connected, setConnected] = useState(false);
-  const [realtimeUpdates, setRealtimeUpdates] = useState([]);
 
   const checkHealth = async () => {
     try {
@@ -114,10 +111,6 @@ function App() {
           </div>
           
           <div className="status-badges">
-            <div className={`badge ${connected ? 'online' : 'offline'}`}>
-              <div className="status-dot"></div>
-              {connected ? 'Live Updates' : 'Offline'}
-            </div>
             <div className="badge online">
               <div className="status-dot"></div>
               API Connected
@@ -162,19 +155,6 @@ function App() {
             🔄 Refresh
           </button>
         </div>
-
-        {/* Real-time Updates Feed */}
-        {realtimeUpdates.length > 0 && (
-          <div className="realtime-feed">
-            <h3>🔴 Live Updates</h3>
-            {realtimeUpdates.map((update, i) => (
-              <div key={i} className="update-item">
-                <span className="update-type">{update.type}</span>
-                <span className="update-time">{new Date().toLocaleTimeString()}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Stats */}
         <div className="stats-grid">
