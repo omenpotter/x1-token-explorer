@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// YOUR PRODUCTION API
-const API_URL = 'http://45.94.81.202:3001';
-const WS_URL = 'ws://45.94.81.202:3001';
+// Use relative paths - Vercel serverless function will proxy to your API
+const API_URL = '/api/proxy';
+const WS_URL = 'ws://45.94.81.202:3001'; // Direct WebSocket (may not work on HTTPS)
 
 function App() {
   const [tokens, setTokens] = useState([]);
@@ -61,8 +61,11 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Setup WebSocket for real-time updates
+  // Setup WebSocket for real-time updates (disabled on HTTPS)
   useEffect(() => {
+    // WebSocket won't work on HTTPS with HTTP endpoint
+    // Uncomment if you setup WSS or run on HTTP
+    /*
     const ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
@@ -91,6 +94,7 @@ function App() {
     };
 
     return () => ws.close();
+    */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
