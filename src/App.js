@@ -14,9 +14,50 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [realtimeUpdates, setRealtimeUpdates] = useState([]);
 
+  const checkHealth = async () => {
+    try {
+      const response = await fetch(`${API_URL}/health`);
+      const data = await response.json();
+      console.log('API Health:', data);
+    } catch (error) {
+      console.error('API Health check failed:', error);
+    }
+  };
+
+  const fetchTokens = async (pageNum = 1, searchQuery = '') => {
+    setLoading(true);
+    try {
+      const limit = 20;
+      const offset = (pageNum - 1) * limit;
+      
+      const url = searchQuery 
+        ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&limit=${limit}`
+        : `${API_URL}/api/tokens?limit=${limit}&offset=${offset}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        setTokens(data.data.tokens || data.data.results || []);
+        setTotal(data.data.pagination?.total || data.data.tokens?.length || 0);
+        setPage(pageNum);
+      }
+    } catch (error) {
+      console.error('Fetch tokens failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchTokens(1, search);
+  };
+
   // Check API health on load
   useEffect(() => {
     checkHealth();
+    fetchTokens();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -40,7 +81,7 @@ function App() {
       
       // Refresh tokens if new token created
       if (update.type === 'token_created') {
-        fetchTokens();
+        fetchTokens(page, search);
       }
     };
 
@@ -50,50 +91,6 @@ function App() {
     };
 
     return () => ws.close();
-  }, []);
-
-  const checkHealth = async () => {
-    try {
-      const response = await fetch(`${API_URL}/health`);
-      const data = await response.json();
-      console.log('API Health:', data);
-    } catch (error) {
-      console.error('API Health check failed:', error);
-    }
-  };
-
-  const fetchTokens = async (pageNum = 1) => {
-    setLoading(true);
-    try {
-      const limit = 20;
-      const offset = (pageNum - 1) * limit;
-      
-      const url = search 
-        ? `${API_URL}/api/search?q=${encodeURIComponent(search)}&limit=${limit}`
-        : `${API_URL}/api/tokens?limit=${limit}&offset=${offset}`;
-
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data.success) {
-        setTokens(data.data.tokens || data.data.results || []);
-        setTotal(data.data.pagination?.total || data.data.tokens?.length || 0);
-        setPage(pageNum);
-      }
-    } catch (error) {
-      console.error('Fetch tokens failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchTokens(1);
-  };
-
-  useEffect(() => {
-    fetchTokens();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -144,7 +141,7 @@ function App() {
                 type="button"
                 onClick={() => {
                   setSearch('');
-                  fetchTokens(1);
+                  fetchTokens(1, '');
                 }}
                 className="btn-secondary"
               >
@@ -154,7 +151,7 @@ function App() {
           </form>
           
           <button
-            onClick={() => fetchTokens(page)}
+            onClick={() => fetchTokens(page, search)}
             className="btn-refresh"
             disabled={loading}
           >
@@ -207,7 +204,7 @@ function App() {
                       src={token.logo_uri}
                       alt={token.name}
                       className="token-image"
-                      onError={(e) => e.target.style.display = 'none'}
+                      onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   )}
                   
@@ -286,7 +283,7 @@ function App() {
             {/* Pagination */}
             <div className="pagination">
               <button
-                onClick={() => fetchTokens(page - 1)}
+                onClick={() => fetchTokens(page - 1, search)}
                 disabled={page === 1 || loading}
                 className="btn-page"
               >
@@ -298,7 +295,7 @@ function App() {
               </span>
               
               <button
-                onClick={() => fetchTokens(page + 1)}
+                onClick={() => fetchTokens(page + 1, search)}
                 disabled={page >= totalPages || loading}
                 className="btn-page"
               >
