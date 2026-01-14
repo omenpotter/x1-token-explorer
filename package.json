@@ -1,0 +1,23 @@
+{
+  "name": "x1-production-explorer",
+  "version": "1.0.0",
+  "description": "X1 Token Explorer - Connected to Production API at 45.94.81.202:3001",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "deploy": "npm run build && echo 'Ready to deploy build/ folder'"
+  },
+  "eslintConfig": {
+    "extends": ["react-app"]
+  },
+  "browserslist": {
+    "production": [">0.2%", "not dead"],
+    "development": ["last 1 chrome version"]
+  }
+}
